@@ -3,7 +3,7 @@ module ProblemDesc where
 import qualified Data.Map as Map
 import Data.Map (Map)
 import Text.Parsec
-import Text.Parsec.String (Parser, parseFromFile)
+import Text.Parsec.String (Parser)
 
 data Point =
   Point
