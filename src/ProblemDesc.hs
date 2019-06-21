@@ -1,7 +1,5 @@
 module ProblemDesc where
 
-import Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import Data.Map (Map)
 import Text.Parsec
@@ -15,7 +13,7 @@ data Point =
   deriving (Eq, Ord, Show)
 
 data Region =
-  Region (NonEmpty Point)
+  Region [Point]
   deriving (Show)
 
 data Booster
@@ -41,8 +39,7 @@ parseProblem =
   (hash *> (Map.fromList <$> parseBoosterLocs))
   where
     hash = char '#'
-    parseRegion =
-      Region <$> ((:|) <$> parsePoint <*> many (char ',' *> parsePoint))
+    parseRegion = Region <$> (parsePoint `sepBy1` char ',')
     parsePoint =
       Point <$> (char '(' *> parseNat) <*> (char ',' *> parseNat <* char ')')
     parseNat = read <$> many1 digit
