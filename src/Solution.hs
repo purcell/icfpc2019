@@ -1,7 +1,5 @@
 module Solution where
 
-import System.IO (IOMode(WriteMode), hClose, openFile)
-
 data Action
   = MoveUp
   | MoveDown
@@ -14,10 +12,8 @@ data Action
   | AttachFastWheels
   | AttachDrill
 
-writeActions :: Int -> [Action] -> IO ()
-writeActions solutionNum actions = do
-  writeFile ("data/solutions/prob-" ++ show solutionNum ++ ".sol") $
-    concatMap actionToStr actions
+solutionString :: [Action] -> String
+solutionString = concatMap actionToStr
 
 actionToStr :: Action -> String
 actionToStr MoveUp = "W"
