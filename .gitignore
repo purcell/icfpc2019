@@ -1,3 +1,4 @@
 .stack-work/
 icfpc2019.cabal
 *~
+stack.yaml.lock
