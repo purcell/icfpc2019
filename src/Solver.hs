@@ -2,6 +2,7 @@
 
 module Solver where
 
+import BFS (bfs)
 import Control.Monad (when)
 import qualified Data.Foldable as F
 import Data.Function (on)
@@ -23,6 +24,10 @@ reachable ProblemDesc {..} p p' = not (any (rightOfEdge p') curEdges)
   where
     allEdges = edges problemMap ++ concatMap edges problemObstacles
     curEdges = filter (onEdge p) allEdges
+
+pointsToFill :: ProblemDesc -> Set Point
+pointsToFill prob =
+  Set.fromList $ bfs (reachableNeighbours prob) (problemStart prob)
 
 problemEdges :: ProblemDesc -> [(Point, Point)]
 problemEdges ProblemDesc {..} =
