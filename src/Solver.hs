@@ -44,11 +44,7 @@ onEdge (Point x y) (Point x1 y1, Point x2 y2)
 
 neighbours :: Point -> [Point]
 neighbours (Point x y) =
-  [ Point x' y'
-  | x' <- [x - 1 .. x + 1]
-  , y' <- [y - 1 .. y + 1]
-  , (x, y) /= (x', y')
-  ]
+  [Point (x - 1) y, Point (x + 1) y, Point x (y - 1), Point x (y + 1)]
 
 edges :: Region -> [(Point, Point)]
 edges (Region points) = zip points (tail (cycle points))
