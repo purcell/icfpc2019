@@ -1,10 +1,8 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Solver where
 
 import Control.Monad (when)
-import qualified Control.Monad.State.Strict as ST
 import qualified Data.Foldable as F
 import Data.Function (on)
 import Data.List (groupBy)
@@ -17,34 +15,40 @@ import Solution
 solve :: ProblemDesc -> [Action]
 solve prob = [MoveUp, MoveDown, Rotate90Clockwise]
 
-regionPoints :: Region -> Set Point
-regionPoints region@(Region points) =
-  regionEdgePoints region -- `Set.union` Set.unions (line <$> [ymin .. ymax])
+reachableNeighbours :: ProblemDesc -> Point -> [Point]
+reachableNeighbours prob p = filter (reachable prob p) (neighbours p)
+
+reachable :: ProblemDesc -> Point -> Point -> Bool
+reachable ProblemDesc {..} p p' = not (any (rightOfEdge p') curEdges)
   where
-    line :: Int -> Set Point
-    line y = go False Set.empty [xmin - 1 .. xmax]
-      where
-        go _ contained [] = contained
-        go inside contained (x:xs) =
-          let p = Point x y
-              inside' = inside /= elem x (verticalEdges y)
-           in go
-                inside'
-                (if inside'
-                   then p `Set.insert` contained
-                   else contained)
-                xs
-    verticalEdges y =
-      [ v1x
-      | (Point v1x v1y, Point v2x v2y) <- edges region
-      , v1x == v2x
-      , min v1y v2y <= y
-      , max v1y v2y >= y
-      ]
-    xmin = F.minimum ((\(Point x _) -> x) <$> points)
-    xmax = F.maximum ((\(Point x _) -> x) <$> points)
-    ymin = F.minimum ((\(Point _ y) -> y) <$> points)
-    ymax = F.maximum ((\(Point _ y) -> y) <$> points)
+    allEdges = edges problemMap ++ concatMap edges problemObstacles
+    curEdges = filter (onEdge p) allEdges
+
+problemEdges :: ProblemDesc -> [(Point, Point)]
+problemEdges ProblemDesc {..} =
+  edges problemMap ++ concatMap edges problemObstacles
+
+rightOfEdge :: Point -> (Point, Point) -> Bool
+rightOfEdge (Point x y) (Point x1 y1, Point x2 y2)
+  | x1 < x2 = y < y1
+  | y1 < y2 = x > x1
+  | x1 > x2 = y < y1
+  | y1 > y2 = x < x1
+  | otherwise = False
+
+onEdge :: Point -> (Point, Point) -> Bool
+onEdge (Point x y) (Point x1 y1, Point x2 y2)
+  | x1 == x2 && x == x1 = y >= min y1 y2 && y <= max y1 y2
+  | y1 == y2 && y == y1 = x >= min x1 x2 && x <= max x1 x2
+  | otherwise = False
+
+neighbours :: Point -> [Point]
+neighbours (Point x y) =
+  [ Point x' y'
+  | x' <- [x - 1 .. x + 1]
+  , y' <- [y - 1 .. y + 1]
+  , (x, y) /= (x', y')
+  ]
 
 edges :: Region -> [(Point, Point)]
 edges (Region points) = zip points (tail (cycle points))
@@ -71,16 +75,3 @@ regionEdgePoints (Region ps) = Set.unions (go <$> (zip ps (tail (cycle ps))))
         | x' <- [(min x1 x2) .. (max x1 x2)]
         , y' <- [(min y1 y2) .. (max y1 y2)]
         ]
-{-
-xpxxxxxx
-x  p   xxx
-x        x
-x    ooo x
-x    o o x
-x    ooo x
-x        x
-xxxooxxxxx
-
-toFill = (pointsAlongEdge - coincidingPointsOnObstacleEdges) + interiorArea
-
--}
