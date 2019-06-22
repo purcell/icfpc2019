@@ -32,7 +32,7 @@ rightOfEdge :: Point -> (Point, Point) -> Bool
 rightOfEdge (Point x y) (Point x1 y1, Point x2 y2)
   | x1 < x2 = y < y1
   | y1 < y2 = x > x1
-  | x1 > x2 = y < y1
+  | x1 > x2 = y > y1
   | y1 > y2 = x < x1
   | otherwise = False
 
