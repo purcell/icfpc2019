@@ -12,9 +12,33 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import ProblemDesc
 import Solution
+import State
 
 solve :: ProblemDesc -> [Action]
-solve prob = [MoveUp, MoveDown, Rotate90Clockwise]
+solve prob = actions $ fillUntilDone $ initialState prob (Point 0 0) Set.empty
+
+fillUntilDone :: State -> State
+fillUntilDone state =
+  let (newCurrentPoint, actionTaken) =
+        takeAction (currentPoint state) (targetPoint state)
+      newTargetPoint =
+        if currentPoint state == targetPoint state
+          then Set.elemAt 0 $ unfilledPoints state
+          else targetPoint state
+      newUnfilledPoints = Set.delete newCurrentPoint $ unfilledPoints state
+      newState =
+        State
+          { currentPoint = newCurrentPoint
+          , targetPoint = newTargetPoint
+          , unfilledPoints = newUnfilledPoints
+          , actions = actions state ++ [actionTaken]
+          }
+   in if Set.null $ unfilledPoints newState
+        then newState
+        else fillUntilDone newState
+
+takeAction :: Point -> Point -> (Point, Action)
+takeAction current target = (current, MoveUp)
 
 reachableNeighbours :: ProblemDesc -> Point -> [Point]
 reachableNeighbours prob p = filter (reachable prob p) (neighbours p)
