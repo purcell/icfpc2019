@@ -15,7 +15,11 @@ import Solution
 import State
 
 solve :: ProblemDesc -> [Action]
-solve prob = actions $ fillUntilDone $ initialState prob (Point 0 0) Set.empty
+solve prob =
+  actions $ fillUntilDone $ initialState prob firstTarget' unfilledPoints
+  where
+    (firstTarget, unfilledPoints) = Set.splitAt 0 $ pointsToFill prob
+    firstTarget' = Set.elemAt 0 firstTarget
 
 fillUntilDone :: State -> State
 fillUntilDone state =
