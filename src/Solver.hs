@@ -57,10 +57,10 @@ showPoints points = concatMap line [ymax,ymax - 1 .. ymin]
       if Point x y `Set.member` points
         then '#'
         else ' '
-    xmin = F.minimum ((\(Point x _) -> x) <$> Set.toList points)
-    xmax = F.maximum ((\(Point x _) -> x) <$> Set.toList points)
-    ymin = F.minimum ((\(Point _ y) -> y) <$> Set.toList points)
-    ymax = F.maximum ((\(Point _ y) -> y) <$> Set.toList points)
+    xmin = F.minimum (x <$> Set.toList points)
+    xmax = F.maximum (x <$> Set.toList points)
+    ymin = F.minimum (y <$> Set.toList points)
+    ymax = F.maximum (y <$> Set.toList points)
 
 regionEdgePoints :: Region -> Set Point
 regionEdgePoints (Region ps) = Set.unions (go <$> (zip ps (tail (cycle ps))))
